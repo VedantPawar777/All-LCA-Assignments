@@ -1,1 +1,50 @@
+#include <stdio.h>
+#include <string.h>
+
+int main() {
+    char str1[100] = "Hello";
+    char str2[100] = "World";
+    char copyStr[100];
+    int len, cmp, i, j;
+    char temp;
+
+    printf("Original String 1: %s\n", str1);
+    printf("Original String 2: %s\n\n", str2);
+
+    // 1. String Length using strlen()
+    len = strlen(str1);
+    printf("1. Length of String 1: %d\n", len);
+
+    // 2. String Copy using strcpy()
+    strcpy(copyStr, str1);
+    printf("2. Copied String: %s\n", copyStr);
+
+    // 3. String Comparison using strcmp()
+    cmp = strcmp(str1, str2);
+    if (cmp == 0) {
+        printf("3. Comparison: Strings are equal.\n");
+    } else {
+        printf("3. Comparison: Strings are not equal.\n");
+    }
+
+    // 4. String Concatenation using strcat()
+    strcat(str1, " ");   // Adds a space
+    strcat(str1, str2);  // Appends str2 to str1
+    printf("4. Concatenated String: %s\n", str1);
+
+    // 5. String Reverse (Manual method for standard C compatibility)
+    i = 0;
+    j = strlen(str1) - 1;
+    while (i < j) {
+        temp = str1[i];
+        str1[i] = str1[j];
+        str1[j] = temp;
+        i++;
+        j--;
+    }
+    printf("5. Reversed String: %s\n", str1);
+
+    return 0;
+}
+
 
