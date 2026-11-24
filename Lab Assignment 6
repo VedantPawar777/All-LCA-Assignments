@@ -1,1 +1,51 @@
+Without Recursion:
 
+#include <stdio.h>
+
+int main() {
+    int n, i;
+    unsigned long long fact = 1;
+
+    printf("Enter a positive integer: ");
+    scanf("%d", &n);
+
+    // Check if the user entered a negative integer
+    if (n < 0) {
+        printf("Error! Factorial of a negative number doesn't exist.\n");
+    } else {
+        for (i = 1; i <= n; ++i) {
+            fact *= i;
+        }
+        printf("Factorial of %d = %llu\n", n, fact);
+    }
+
+    return 0;
+}
+
+With Recursion:
+
+#include <stdio.h>
+unsigned long long multiplyNumbers(int n);
+
+int main() {
+    int n;
+
+    printf("Enter a positive integer: ");
+    scanf("%d", &n);
+
+    if (n < 0) {
+        printf("Error! Factorial of a negative number doesn't exist.\n");
+    } else {
+        printf("Factorial of %d = %llu\n", n, multiplyNumbers(n));
+    }
+
+    return 0;
+}
+
+unsigned long long multiplyNumbers(int n) {
+    if (n >= 1) {
+        return n * multiplyNumbers(n - 1);
+    } else {
+        return 1;
+    }
+}
