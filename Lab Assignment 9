@@ -1,1 +1,133 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
+// Define safety thresholds for fault detection
+#define MAX_SAFE_TEMP 75.0    // Maximum safe temperature in Celsius
+#define MAX_SAFE_TORQUE 50.0  // Maximum safe torque in Nm
+#define FILENAME "robot_arm_logs.txt"
+
+// Structure to hold a single telemetry record
+struct RobotRecord {
+    int recordId;
+    float jointAngle;
+    float motorTemp;
+    float torque;
+    char status[20];
+};
+
+// Function to record new robotic arm data into a file
+void addRecord() {
+    FILE *fp = fopen(FILENAME, "a"); // Open in append mode
+    if (fp == NULL) {
+        printf("Error: Unable to open file for writing!\n");
+        return;
+    }
+
+    struct RobotRecord rec;
+    printf("\n--- Enter Robotic Arm Telemetry ---\n");
+    printf("Record ID: ");
+    scanf("%d", &rec.recordId);
+    printf("Joint Angle (degrees): ");
+    scanf("%f", &rec.jointAngle);
+    printf("Motor Temperature (C): ");
+    scanf("%f", &rec.motorTemp);
+    printf("Torque Value (Nm): ");
+    scanf("%f", &rec.torque);
+    printf("Operation Status (e.g., OK, WARNING, ERROR): ");
+    scanf("%19s", rec.status);
+
+    // Write formatted data to the file
+    fprintf(fp, "%d %.2f %.2f %.2f %s\n", 
+            rec.recordId, rec.jointAngle, rec.motorTemp, rec.torque, rec.status);
+
+    fclose(fp);
+    printf("Record saved successfully!\n");
+}
+
+// Function to read historical records and detect anomalies
+void analyzeRecords() {
+    FILE *fp = fopen(FILENAME, "r"); // Open in read mode
+    if (fp == NULL) {
+        printf("\nNo historical records found. Please add records first.\n");
+        return;
+    }
+
+    struct RobotRecord rec;
+    int totalRecords = 0, faultCount = 0;
+
+    printf("\n--- Historical Diagnostic Report ---\n");
+    printf("%-8s %-10s %-10s %-10s %-10s %s\n", 
+           "ID", "Angle", "Temp(C)", "Torque", "Status", "Diagnostic Alert");
+    printf("--------------------------------------------------------------------------\n");
+
+    // Read records line by line until End-of-File (EOF)
+    while (fscanf(fp, "%d %f %f %f %19s", 
+                  &rec.recordId, &rec.jointAngle, &rec.motorTemp, &rec.torque, rec.status) == 5) {
+        totalRecords++;
+        int isAbnormal = 0;
+
+        printf("%-8d %-10.2f %-10.2f %-10.2f %-10s ", 
+               rec.recordId, rec.jointAngle, rec.motorTemp, rec.torque, rec.status);
+
+        // Check for abnormal motor temperature
+        if (rec.motorTemp > MAX_SAFE_TEMP) {
+            printf("[HIGH TEMP] ");
+            isAbnormal = 1;
+        }
+
+        // Check for excessive torque
+        if (rec.torque > MAX_SAFE_TORQUE) {
+            printf("[EXCESS TORQUE] ");
+            isAbnormal = 1;
+        }
+
+        // Check for potential mechanical failure (combined stress or error status)
+        if ((rec.motorTemp > MAX_SAFE_TEMP && rec.torque > MAX_SAFE_TORQUE) || 
+            strcmp(rec.status, "ERROR") == 0) {
+            printf("-> POTENTIAL MECHANICAL FAILURE!");
+            isAbnormal = 1;
+        }
+
+        if (!isAbnormal) {
+            printf("Normal");
+        } else {
+            faultCount++;
+        }
+        printf("\n");
+    }
+
+    printf("--------------------------------------------------------------------------\n");
+    printf("Total Records Analyzed: %d | Abnormal Records Detected: %d\n", totalRecords, faultCount);
+
+    fclose(fp);
+}
+
+int main() {
+    int choice;
+
+    while (1) {
+        printf("\n=== Robotic Arm Monitoring System ===\n");
+        printf("1. Record New Telemetry Data\n");
+        printf("2. Analyze Historical Records for Faults\n");
+        printf("3. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                addRecord();
+                break;
+            case 2:
+                analyzeRecords();
+                break;
+            case 3:
+                printf("Exiting program.\n");
+                exit(0);
+            default:
+                printf("Invalid choice! Please enter 1, 2, or 3.\n");
+        }
+    }
+
+    return 0;
+}
